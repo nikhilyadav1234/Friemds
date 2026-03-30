@@ -172,8 +172,11 @@ app.post("/api/auth/send-otp", async (req, res) => {
     { upsert: true }
   );
 
+if (process.env.MOCK_OTP === "true") {
+  console.log("🔥 MOCK OTP for", email, "is:", otp);
+} else {
   await sendOTPEmail(email, otp);
-
+}
   res.json({ message: "OTP sent to email" });
 });
 
@@ -287,8 +290,11 @@ app.post("/api/auth/login", async (req, res) => {
   );
 
   // 📩 SEND EMAIL
+if (process.env.MOCK_OTP === "true") {
+  console.log("🔥 MOCK OTP for", email, "is:", otp);
+} else {
   await sendOTPEmail(email, otp);
-
+}
   res.json({ message: "OTP sent for login" });
 });
 
