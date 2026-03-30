@@ -172,8 +172,11 @@ app.post("/api/auth/send-otp", async (req, res) => {
     { upsert: true }
   );
 
+if (process.env.MOCK_OTP === "true") {
+  console.log("🔥 MOCK OTP for", email, "is:", otp);
+} else {
   await sendOTPEmail(email, otp);
-
+}
   res.json({ message: "OTP sent to email" });
 });
 
@@ -287,8 +290,11 @@ app.post("/api/auth/login", async (req, res) => {
   );
 
   // 📩 SEND EMAIL
+if (process.env.MOCK_OTP === "true") {
+  console.log("🔥 MOCK OTP for", email, "is:", otp);
+} else {
   await sendOTPEmail(email, otp);
-
+}
   res.json({ message: "OTP sent for login" });
 });
 
@@ -407,18 +413,18 @@ app.post(
 
           const imageUrl = result.secure_url;
 
-          await User.updateOne(
-            { user_id: req.user },
-            { $set: { avatar: imageUrl } }
-          );
+          // await User.updateOne(
+          //   { user_id: req.user },
+          //   { $set: { avatar: imageUrl } }
+          // );
 
-          const user = await User.findOne({ user_id: req.user });
+          // const user = await User.findOne({ user_id: req.user });
 
-          res.json({
-            message: "Profile photo updated",
-            avatar: imageUrl,
-            user,
-          });
+          // res.json({
+          //   message: "Profile photo updated",
+          //   avatar: imageUrl,
+          //   user,
+          // });
         }
       );
 
