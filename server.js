@@ -401,35 +401,29 @@ app.post(
       if (!req.file) {
         return res.status(400).json({ msg: "No file uploaded" });
       }
+        const base64 = req.file.buffer.toString("base64");
 
-      // 🔥 Upload to cloudinary manually
-      const result = await cloudinary.uploader.upload_stream(
-        { folder: "friemds" },
-        async (error, result) => {
-          if (error) {
-            console.log(error);
-            return res.status(500).json({ msg: "Upload error" });
+        const result = await cloudinary.uploader.upload(
+          `data:${req.file.mimetype};base64,${base64}`,
+          {
+            folder: "friemds",
           }
+        );
 
-          const imageUrl = result.secure_url;
+        const imageUrl = result.secure_url;
 
-          // await User.updateOne(
-          //   { user_id: req.user },
-          //   { $set: { avatar: imageUrl } }
-          // );
+        await User.updateOne(
+          { user_id: req.user },
+          { $set: { avatar: imageUrl } }
+        );
 
-          // const user = await User.findOne({ user_id: req.user });
+        const user = await User.findOne({ user_id: req.user });
 
-          // res.json({
-          //   message: "Profile photo updated",
-          //   avatar: imageUrl,
-          //   user,
-          // });
-        }
-      );
-
-      result.end(req.file.buffer);
-
+        res.json({
+          message: "Profile photo updated",
+          avatar: imageUrl,
+          user,
+        });
     } catch (err) {
       console.log("🔥 ERROR:", err.message);
       res.status(500).json({ msg: err.message });
