@@ -396,42 +396,38 @@ app.post(
   upload.single("avatar"),
   async (req, res) => {
     try {
-      console.log("FILE:", req.file);
-
       if (!req.file) {
         return res.status(400).json({ msg: "No file uploaded" });
       }
 
-      // 🔥 Upload to cloudinary manually
-      const result = await cloudinary.uploader.upload_stream(
-        { folder: "friemds" },
-        async (error, result) => {
-          if (error) {
-            console.log(error);
-            return res.status(500).json({ msg: "Upload error" });
-          }
+      // 🔥 convert buffer → base64
+      const base64 = req.file.buffer.toString("base64");
 
-          const imageUrl = result.secure_url;
-
-          await User.updateOne(
-            { user_id: req.user },
-            { $set: { avatar: imageUrl } }
-          );
-
-          const user = await User.findOne({ user_id: req.user });
-
-          res.json({
-            message: "Profile photo updated",
-            avatar: imageUrl,
-            user,
-          });
+      // 🔥 upload directly
+      const result = await cloudinary.uploader.upload(
+        `data:${req.file.mimetype};base64,${base64}`,
+        {
+          folder: "friemds"
         }
       );
 
-      result.end(req.file.buffer);
+      const imageUrl = result.secure_url;
+
+      await User.updateOne(
+        { user_id: req.user },
+        { $set: { avatar: imageUrl } }
+      );
+
+      const user = await User.findOne({ user_id: req.user });
+
+      res.json({
+        message: "Profile photo updated",
+        avatar: imageUrl,
+        user,
+      });
 
     } catch (err) {
-      console.log("🔥 ERROR:", err.message);
+      console.log("🔥 UPLOAD ERROR:", err);
       res.status(500).json({ msg: err.message });
     }
   }
