@@ -606,8 +606,9 @@ app.get("/api/messages/unread/count", authMiddleware, async (req, res) => {
 
 const WebSocket = require("ws");
 const PORT = process.env.PORT || 8000;
-const server = app.listen(8000, () => {
-  console.log("🔥 Server running on http://localhost:8000");
+
+const server = app.listen(PORT, () => {
+  console.log(`🔥 Server running on port ${PORT}`);
 });
 
 const wss = new WebSocket.Server({ server, path: "/ws" });
