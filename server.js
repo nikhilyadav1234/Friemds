@@ -426,32 +426,50 @@ app.post(
         user,
       });
 
-    } catch (err) {
+    } 
+    catch (err) {
       console.log("🔥 UPLOAD ERROR:", err);
-      res.status(500).json({ msg: err.message });
+      res.status(500).json({ msg: err.message }); 
     }
   }
 );
 
 
 
-/* ================= FRIEND ================= */
+// /* ================= FRIEND ================= */
 
-// app.post("/api/friends/request", authMiddleware, async (req, res) => {
-//   const sender = await User.findOne({ user_id: req.user });
+// // app.post("/api/friends/request", authMiddleware, async (req, res) => {
+// //   const sender = await User.findOne({ user_id: req.user });
 
-//   const request = await FriendRequest.create({
-//     request_id: uuidv4(),
-//     sender_id: req.user,
-//     sender_name: sender.name,
-//     sender_avatar: sender.avatar,
-//     recipient_id: req.body.recipient_id,
-//     status: "pending",
-//     created_at: new Date().toISOString(),
-//   });
+// //   const request = await FriendRequest.create({
+// //     request_id: uuidv4(),
+// //     sender_id: req.user,
+// //     sender_name: sender.name,
+// //     sender_avatar: sender.avatar,
+// //     recipient_id: req.body.recipient_id,
+// //     status: "pending",
+// //     created_at: new Date().toISOString(),
+// //   });
 
-//   res.json(request);
-// });
+// //   res.json(request);
+// // });
+
+
+
+
+
+app.get("/test-cloudinary", async (req, res) => {
+  try {
+    const result = await cloudinary.uploader.upload(
+      "https://res.cloudinary.com/demo/image/upload/sample.jpg"
+    );
+    res.json(result);
+  } catch (err) {
+    console.log("🔥 TEST ERROR:", err);
+    res.status(500).json(err);
+  }
+});
+
 
 
 app.post("/api/friends/request", authMiddleware, async (req, res) => {
