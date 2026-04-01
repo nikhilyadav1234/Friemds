@@ -105,6 +105,12 @@ const Message = mongoose.model("Message", new mongoose.Schema({
 
 /* ================= HELPERS ================= */
 
+const allowedDomains = process.env.ALLOWED_DOMAINS.split(",");
+
+const isAllowedEmail = (email) => {
+  return allowedDomains.some(domain => email.endsWith(domain));
+};
+
 const generateOTP = () =>
   Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -159,6 +165,12 @@ const sendOTPEmail = async (email, otp) => {
 // SEND OTP
 app.post("/api/auth/send-otp", async (req, res) => {
   const email = req.body.email.toLowerCase();
+
+  if (!isAllowedEmail(email)) {
+  return res.status(400).json({
+    msg: "Only CU emails allowed"
+  });
+}
 
   const otp = generateOTP();
 
@@ -267,6 +279,11 @@ app.post("/api/auth/verify-otp", async (req, res) => {
 /* ================= Login ================= */
 app.post("/api/auth/login", async (req, res) => {
   const email = req.body.email.toLowerCase();
+  if (!isAllowedEmail(email)) {
+  return res.status(400).json({
+    msg: "Only CU emails allowed"
+  });
+}
 
   const user = await User.findOne({ email });
 
