@@ -671,6 +671,18 @@ app.get("/api/messages/last", authMiddleware, async (req, res) => {
     },
     {
       $sort: { created_at: -1 }
+    },
+    {
+      $group: {
+        _id: {
+          $cond: [
+            { $eq: ["$sender_id", userId] },
+            "$recipient_id",
+            "$sender_id"
+          ]
+        },
+        lastMessage: { $first: "$$ROOT" }
+      }
     }
   ]);
 
