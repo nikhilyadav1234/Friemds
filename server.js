@@ -69,6 +69,9 @@ const User = mongoose.model("User", new mongoose.Schema({
   user_id: String,
   email: String,
   name: String,
+  age: String,
+  gender: String,
+  phone: String,
   bio: { type: String, default: "" },
   interests: { type: [String], default: [] },
   avatar: { type: String, default: null },
@@ -165,6 +168,7 @@ const sendOTPEmail = async (email, otp) => {
 // SEND OTP
 app.post("/api/auth/send-otp", async (req, res) => {
   const email = req.body.email.toLowerCase();
+  
 
   if (!isAllowedEmail(email)) {
   return res.status(400).json({
@@ -228,8 +232,8 @@ if (process.env.MOCK_OTP === "true") {
 
 
 app.post("/api/auth/verify-otp", async (req, res) => {
-  const { email, otp, name, interests } = req.body;
-
+  const email = req.body.email.toLowerCase();
+const { otp, name, interests, age, gender, phone } = req.body;
   const otpDoc = await OTP.findOne({ email });
 
   if (!otpDoc) return res.status(400).json({ msg: "OTP not found" });
@@ -260,12 +264,15 @@ app.post("/api/auth/verify-otp", async (req, res) => {
   const user_id = uuidv4();
 
   user = await User.create({
-    user_id,
-    email,
-    name,
-    interests: interests || [],
-    created_at: new Date().toISOString(),
-  });
+  user_id,
+  email,
+  name,
+  age,
+  gender,
+  phone,
+  interests: interests || [],
+  created_at: new Date().toISOString(),
+});
 
  res.json({
   message: "Signup successful",
@@ -581,6 +588,23 @@ app.get("/api/friends", authMiddleware, async (req, res) => {
   res.json(friends);
 });
 
+
+
+
+  
+
+
+app.get("/api/users/:id", authMiddleware, async (req, res) => {
+  const user = await User.findOne({ user_id: req.params.id });
+  res.json(user);
+});
+
+
+
+
+
+
+
 /* ================= MESSAGE ================= */
 
 app.post("/api/messages", authMiddleware, async (req, res) => {
@@ -625,6 +649,32 @@ app.get("/api/messages/unread/count", authMiddleware, async (req, res) => {
   });
 
   res.json({ unread_count: count });
+});
+
+
+
+
+
+
+
+app.get("/api/messages/last", authMiddleware, async (req, res) => {
+  const userId = req.user;
+
+  const messages = await Message.aggregate([
+    {
+      $match: {
+        $or: [
+          { sender_id: userId },
+          { recipient_id: userId }
+        ]
+      }
+    },
+    {
+      $sort: { created_at: -1 }
+    }
+  ]);
+
+  res.json(messages);
 });
 
 /* ================= START ================= */
