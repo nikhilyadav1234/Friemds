@@ -340,10 +340,47 @@ app.put("/api/users/me", authMiddleware, async (req, res) => {
 });
 
 app.get("/api/users", authMiddleware, async (req, res) => {
+  const currentUser = await User.findOne({ user_id: req.user });
+
+  // ✅ friends list
+  const friendIds = currentUser.friends || [];
+
+  // ✅ sent requests
+  const sentRequests = await FriendRequest.find({
+    sender_id: req.user,
+    status: "pending"
+  });
+
+  const sentIds = sentRequests.map(r => r.recipient_id);
+
+  // ✅ received requests
+  const receivedRequests = await FriendRequest.find({
+    recipient_id: req.user,
+    status: "pending"
+  });
+
+  const receivedIds = receivedRequests.map(r => r.sender_id);
+
+  // ✅ EXCLUDE ALL
+  const excludeIds = [
+    req.user,
+    ...friendIds,
+    ...sentIds,
+    ...receivedIds
+  ];
+
+  // ✅ FINAL USERS
   const users = await User.aggregate([
-  { $match: { user_id: { $ne: req.user } } },
-  { $sample: { size: 20 } } // 👈 RANDOM USERS
-]);
+    {
+      $match: {
+        user_id: { $nin: excludeIds }
+      }
+    },
+    {
+      $sample: { size: 20 } // random but filtered
+    }
+  ]);
+
   res.json(users);
 });
 
