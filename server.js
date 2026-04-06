@@ -583,6 +583,20 @@ app.get("/api/friends/requests", authMiddleware, async (req, res) => {
   res.json(requests);
 });
 
+
+
+app.get("/api/friends/sent", authMiddleware, async (req, res) => {
+  const sent = await FriendRequest.find({
+    sender_id: req.user,
+    status: "pending"
+  });
+
+  res.json(sent);
+});
+
+
+
+
 app.post("/api/friends/accept", authMiddleware, async (req, res) => {
   const fr = await FriendRequest.findOne({
     request_id: req.body.request_id,
