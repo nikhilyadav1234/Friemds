@@ -739,6 +739,11 @@ app.get("/api/messages/last", authMiddleware, async (req, res) => {
       }
     },
     {
+      $addFields: {
+        createdAtDate: { $toDate: "$created_at" } // 🔥 FIX
+      }
+    },
+    {
       $sort: { created_at: -1 }
     },
     {
