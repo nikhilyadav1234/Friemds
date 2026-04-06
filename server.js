@@ -744,7 +744,8 @@ app.get("/api/messages/last", authMiddleware, async (req, res) => {
       }
     },
     {
-      $sort: { created_at: -1 }
+      // $sort: { created_at: -1 }
+      $sort: { createdAtDate: -1 } // 🔥 CORRECT
     },
     {
       $group: {
