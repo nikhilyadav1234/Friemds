@@ -601,15 +601,18 @@ app.delete("/api/friends/cancel/:id", authMiddleware, async (req, res) => {
   const senderId = req.user;
   const recipientId = req.params.id;
 
-  await FriendRequest.deleteOne({
+  const result = await FriendRequest.deleteOne({
     sender_id: senderId,
     recipient_id: recipientId,
     status: "pending"
   });
 
+  if (result.deletedCount === 0) {
+    return res.status(400).json({ msg: "Request not found" });
+  }
+
   res.json({ message: "Request cancelled" });
 });
-
 
 
 app.post("/api/friends/accept", authMiddleware, async (req, res) => {
